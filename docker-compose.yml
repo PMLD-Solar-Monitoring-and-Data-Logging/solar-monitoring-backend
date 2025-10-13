@@ -1,4 +1,16 @@
 services:
+  app:
+    image: PMLD-Solar-Monitoring-and-Data-Logging/solar-monitoring-backend
+    expose:
+      - "3000"
+    env_file:
+      - ./.env
+    environment:
+      - TB_BASE_URL=http://thingsboard-ce:8080
+      - NITRO_PORT=3000
+    depends_on:
+      - thingsboard-ce
+
   postgres:
     image: "postgres:16"
     ports:
