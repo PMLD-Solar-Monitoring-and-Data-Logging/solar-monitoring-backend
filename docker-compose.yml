@@ -1,6 +1,6 @@
 services:
   app:
-    image: PMLD-Solar-Monitoring-and-Data-Logging/solar-monitoring-backend
+    image: ghcr.io/pmld-solar-monitoring-and-data-logging/solar-monitoring-backend:latest
     expose:
       - "3000"
     env_file:
