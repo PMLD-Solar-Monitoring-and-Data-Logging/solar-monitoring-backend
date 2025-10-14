@@ -2,6 +2,12 @@ import axios from "axios";
 const deviceId = process.env.TB_DEVICE_ID;
 
 export default async function getCurrentData(authHeader: string) {
+    if(!authHeader) {
+        throw new Error("Unauthorized");
+    } else if(typeof authHeader !== "string") {
+        return null;
+    }
+    
     const { data, status } = await axios.get(`/plugins/telemetry/DEVICE/${deviceId}/values/timeseries`, {
         baseURL: process.env.TB_BASE_URL || "http://localhost:8080/api",
         headers: { Authorization: authHeader },

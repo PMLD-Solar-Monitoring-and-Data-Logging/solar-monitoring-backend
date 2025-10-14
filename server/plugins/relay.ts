@@ -2,6 +2,12 @@ import axios from "axios";
 const deviceId = process.env.TB_DEVICE_ID;
 
 export default async function getRelayStatus(authToken: string) {
+    if (!authToken) {
+        throw new Error("Authorization token is required");
+    } else if(typeof authToken !== "string") {
+        return null;
+    }
+    
     const { data, status } = await axios.get(`/plugins/telemetry/DEVICE/${deviceId}/values/attributes/SHARED_SCOPE`, {
         baseURL: process.env.TB_BASE_URL || "http://localhost:8080/api",
         headers: { Authorization: authToken },

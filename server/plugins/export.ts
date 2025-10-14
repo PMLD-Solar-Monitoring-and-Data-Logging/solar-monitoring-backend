@@ -3,6 +3,12 @@ import moment from "moment-timezone";
 const deviceId = process.env.TB_DEVICE_ID;
 
 export default async function exportData(authHeader: string, startTs?: number, endTs?: number) {
+    if(!authHeader) {
+        throw new Error("Unauthorized");
+    } else if(typeof authHeader !== "string") {
+        return null;
+    }
+    
     // Get query parameters for custom date range (optional)
     startTs = startTs || Date.now() - 24 * 60 * 60 * 1000; // default: last 24 hours
     endTs = endTs || Date.now();

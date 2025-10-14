@@ -4,9 +4,12 @@ const deviceId = process.env.TB_DEVICE_ID;
 // [GET] /api/plugins/telemetry/DEVICE/<device_id>/values/timeseries?keys=voltage%2Ccurrent&startTs=1759865100272&endTs=1759865130272&interval=0&useStrictDataTypes=false
 
 export default defineEventHandler(async (event) => {
+    const authHeader = getHeader(event, "authorization") || "";
+    if (!authHeader) {
+        throw createError({ statusCode: 401, statusMessage: "Unauthorized" });
+    }
+    
     try {
-        const authHeader = getHeader(event, "authorization") || "";
-
         // Get query parameters for custom date range (optional)
         const query = getQuery(event);
         const startTs = query.startTs ? Number(query.startTs) : moment().subtract(5, "minutes").valueOf(); // default: last 5 minutes
