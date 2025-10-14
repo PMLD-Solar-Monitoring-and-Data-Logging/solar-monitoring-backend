@@ -6,10 +6,6 @@ on:
       - master
   workflow_dispatch:
 
-env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ toLowerCase(github.repository) }}
-
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
@@ -24,7 +20,7 @@ jobs:
       - name: Log in to the Container registry
         uses: docker/login-action@v3
         with:
-          registry: ${{ env.REGISTRY }}
+          registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
@@ -35,7 +31,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: ghcr.io/${{ secrets.IMAGE_NAME }}
           tags: |
             type=sha,format=long
             type=raw,value=latest
@@ -64,7 +60,7 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-            docker pull ghcr.io/${{ env.IMAGE_NAME }}:latest
+            docker pull ghcr.io/${{ secrets.IMAGE_NAME }}:latest
             cd {{ secrets.WORKDIR }}
             git pull
             docker compose up -d --force-recreate app
