@@ -67,4 +67,4 @@ jobs:
             docker pull ghcr.io/${{ github.repository }}:latest
             cd {{ secrets.WORKDIR }}
             git pull
-            docker-compose up -d --force-recreate
+            docker compose up -d --force-recreate app
