@@ -1,29 +1,55 @@
+
 services:
   app:
     image: ghcr.io/pmld-solar-monitoring-and-data-logging/solar-monitoring-backend:latest
+    networks:
+      - thingsboard
+      - reverse-proxy
     expose:
       - "3000"
     env_file:
       - ./.env
     environment:
-      - TB_BASE_URL=http://thingsboard-ce:8080
+      - TB_BASE_URL=http://thingsboard-ce:8080/api
       - NITRO_PORT=3000
+      - PORT=3000
+      - HOST=0.0.0.0
     depends_on:
       - thingsboard-ce
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.thingsboard-web.service=thingsboard-web"
+      - "traefik.http.routers.thingsboard-web.rule=Host(`solar.crazyz.biz.id`)"
+      - "traefik.http.routers.thingsboard-web.entrypoints=websecure"
+      - "traefik.http.routers.thingsboard-web.tls=true"
+      - "traefik.http.routers.thingsboard-web.tls.certresolver=leresolver"
+      - "traefik.http.services.thingsboard-web.loadbalancer.server.port=3000"
 
   postgres:
     image: "postgres:16"
-    ports:
-      - "5432"
+    networks:
+      - thingsboard
+      - reverse-proxy
+    # ports:
+    #   - "5432"
     environment:
       POSTGRES_DB: thingsboard
       POSTGRES_PASSWORD: postgres
     volumes:
       - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "/usr/bin/pg_isready -U postgres -d thingsboard"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   thingsboard-ce:
     image: "thingsboard/tb-node:4.2.0"
+    networks:
+      - thingsboard
+      - reverse-proxy
     ports:
-      - "8080:8080"
+      - "8081:8080"
       - "7070:7070"
       - "1883:1883"
       - "8883:8883"
@@ -36,8 +62,24 @@ services:
     environment:
       TB_SERVICE_ID: tb-ce-node
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/thingsboard
+      MQTT_SSL_ENABLED: true
+      MQTT_SSL_CREDENTIALS_TYPE: PEM
+      MQTT_SSL_PEM_CERT: server.pem
+      MQTT_SSL_PEM_KEY: server_key.pem
+      MQTT_SSL_SKIP_VALIDITY_CHECK_FOR_CLIENT_CERT: true
+    volumes:
+      - thingsboard-config:/etc/thingsboard/conf
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.thingsboard.service=thingsboard"
+      - "traefik.http.routers.thingsboard.rule=Host(`tb.crazyz.biz.id`)"
+      - "traefik.http.routers.thingsboard.entrypoints=websecure"
+      - "traefik.http.routers.thingsboard.tls=true"
+      - "traefik.http.routers.thingsboard.tls.certresolver=leresolver"
+      - "traefik.http.services.thingsboard.loadbalancer.server.port=8080"
 
 volumes:
   postgres-data:
@@ -46,3 +88,15 @@ volumes:
       type: none
       device: ./.docker/postgres-data
       o: bind
+  thingsboard-config:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./.docker/thingsboard-config
+      o: bind
+
+networks:
+  thingsboard:
+    driver: bridge
+  reverse-proxy:
+    external: true
