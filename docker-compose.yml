@@ -8,6 +8,11 @@ services:
     environment:
       - TB_BASE_URL=http://thingsboard-ce:8080
       - NITRO_PORT=3000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 1m
+      timeout: 30s
+      retries: 3
     depends_on:
       - thingsboard-ce
 
