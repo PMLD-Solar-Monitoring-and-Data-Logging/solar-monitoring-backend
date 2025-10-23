@@ -15,6 +15,9 @@ class Handler {
         ]);
 
         bot.on("message", (msg) => this.handleMessage(msg));
+        bot.on("polling_error", (error) => {
+            console.error("[Telegram] Polling error:", error.message || error);
+        });
     }
 
     async handleMessage(msg: TelegramBot.Message) {
@@ -60,11 +63,11 @@ class Handler {
         const status = await getCurrentData("Bearer " + authToken.token);
         const statusMessage =
             `Solar Panel Status:\n` +
-            `Voltage: ${status.voltage}V\n` +
-            `Current: ${status.current}A\n` +
-            `Power Output: ${status.current * status.voltage}W\n` +
-            `Temperature: ${status.temperature}°C\n` +
-            `Light Intensity: ${status.light} lux`;
+            `Voltage: ${status!.voltage}V\n` +
+            `Current: ${status!.current}A\n` +
+            `Power Output: ${status!.current * status!.voltage}W\n` +
+            `Temperature: ${status!.temperature}°C\n` +
+            `Light Intensity: ${status!.light} lux`;
 
         await this.bot.sendMessage(chatId, statusMessage);
     }
@@ -86,6 +89,10 @@ class Handler {
 
         const authToken = await getAccessToken();
         const data = await exportData("Bearer " + authToken.token, start, end);
+        if (!data) {
+            await this.bot.sendMessage(chatId, "No data available for the specified date range.");
+            return;
+        }
         const csvBuffer = Buffer.from(data, "utf8");
         const filename = `solar_panel_data_${new Date().toISOString().split("T")[0]}.csv`;
         await this.bot.sendDocument(chatId, csvBuffer, {}, { filename, contentType: "text/csv" });
