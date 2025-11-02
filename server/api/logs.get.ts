@@ -33,7 +33,7 @@ export default defineEventHandler(async (event) => {
         }
         return data;
     } catch (error: any) {
-        console.error("Error fetching device attributes:", error.response?.data.message || error.message);
+        console.error("Error fetching logs:", error.response?.data.message || error.message);
         throw createError({ statusCode: 500, statusMessage: "Failed to fetch device attributes" });
     }
 });
