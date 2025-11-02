@@ -108,10 +108,10 @@ const exportToCSV = async () => {
         // Convert datetime-local values to timestamps using moment()
         const startTs = moment(`${startDate.value.date}T${startDate.value.time}`).valueOf();
         const endTs = moment(`${endDate.value.date}T${endDate.value.time}`).valueOf();
-
+        const intervalMs = intervalOptions[interval.value] || intervalOptions['5m'];
 
         // Create a temporary link element to trigger download
-        const res = await useAPI(`/api/export?startTs=${startTs}&endTs=${endTs}`, { responseType: 'blob' });
+        const res = await useAPI(`/api/export?startTs=${startTs}&endTs=${endTs}&interval=${intervalMs}`, { responseType: 'blob' });
         // download the blob
         const url = window.URL.createObjectURL(new Blob([res]));
         const link = document.createElement('a');
@@ -138,7 +138,7 @@ onMounted(async () => {
     initFlowbite();
     await fetchData();
     // Refresh data every 5 seconds
-    fetchInterval = setInterval(fetchData, 10000);
+    fetchInterval = setInterval(fetchData, 5000);
 });
 
 onBeforeUnmount(() => {
