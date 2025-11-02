@@ -2,8 +2,8 @@
 services:
   app:
     image: ghcr.io/pmld-solar-monitoring-and-data-logging/solar-monitoring-backend:latest
+    restart: unless-stopped
     networks:
-      - thingsboard
       - reverse-proxy
     expose:
       - "3000"
@@ -31,12 +31,10 @@ services:
       - "traefik.http.services.thingsboard-web.loadbalancer.server.port=3000"
 
   postgres:
+    restart: unless-stopped
     image: "postgres:16"
     networks:
-      - thingsboard
       - reverse-proxy
-    # ports:
-    #   - "5432"
     environment:
       POSTGRES_DB: thingsboard
       POSTGRES_PASSWORD: postgres
@@ -50,8 +48,8 @@ services:
 
   thingsboard-ce:
     image: "thingsboard/tb-node:4.2.0"
+    restart: unless-stopped
     networks:
-      - thingsboard
       - reverse-proxy
     ports:
       - "8081:8080"
@@ -101,7 +99,5 @@ volumes:
       o: bind
 
 networks:
-  thingsboard:
-    driver: bridge
   reverse-proxy:
     external: true
