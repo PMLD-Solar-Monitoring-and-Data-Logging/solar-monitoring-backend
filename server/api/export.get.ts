@@ -14,9 +14,10 @@ export default defineEventHandler(async (event) => {
         const query = getQuery(event);
         const startTs = query.startTs ? Number(query.startTs) : Date.now() - 24 * 60 * 60 * 1000; // default: last 24 hours
         const endTs = query.endTs ? Number(query.endTs) : Date.now();
+        const interval = query.interval ? Number(query.interval) : 5 * 60 * 1000; // default 5m
 
         // Transform data to CSV format
-        const csvData = exportData(authHeader, startTs, endTs);
+        const csvData = exportData(authHeader, startTs, endTs, interval);
 
         // Set response headers for CSV download
         setHeader(event, "Content-Type", "text/csv");
