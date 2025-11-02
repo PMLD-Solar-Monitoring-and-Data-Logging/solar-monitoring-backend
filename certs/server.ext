@@ -1,6 +1,0 @@
-basicConstraints = CA:FALSE
-keyUsage         = critical, digitalSignature, keyEncipherment
-extendedKeyUsage = serverAuth
-subjectAltName   = DNS:tb.example.com
-subjectKeyIdentifier = hash
-authorityKeyIdentifier = keyid,issuer
