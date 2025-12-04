@@ -4,6 +4,7 @@ import moment from "moment-timezone";
 import { computed, onMounted, ref } from "vue";
 import { Line } from "vue-chartjs";
 
+const colorMode = useColorMode();
 const auth = useAuth();
 if (auth.status.value !== "authenticated") {
     await auth.signIn({}, { redirect: false });
@@ -214,21 +215,44 @@ const temperatureChartData = computed(() => {
     };
 });
 
-const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-        legend: {
-            display: true,
-            position: 'top'
+const chartOptions = computed(() => {
+    const isDark = colorMode.value === 'dark';
+    const textColor = isDark ? '#9ca3af' : '#4b5563';
+    const gridColor = isDark ? '#374151' : '#e5e7eb';
+
+    return {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: true,
+                position: 'top',
+                labels: {
+                    color: textColor
+                }
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                grid: {
+                    color: gridColor
+                },
+                ticks: {
+                    color: textColor
+                }
+            },
+            x: {
+                grid: {
+                    color: gridColor
+                },
+                ticks: {
+                    color: textColor
+                }
+            }
         }
-    },
-    scales: {
-        y: {
-            beginAtZero: true
-        }
-    }
-};
+    };
+});
 
 // Adjusted reactivity for startDatePicker to match the new variable format
 const handleStartDateChange = (date) => {
