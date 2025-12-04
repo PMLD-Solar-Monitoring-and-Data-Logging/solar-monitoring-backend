@@ -33,5 +33,8 @@ export default defineNuxtConfig({
             },
         },
     },
+    colorMode: {
+        classSuffix: ''
+    },
     ignore: [".docker/**", "docker-compose.yml", "README.md", "LICENSE", ".bot/**"],
 });
